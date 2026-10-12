@@ -21,14 +21,14 @@ The dashboard exposes a WebSocket endpoint at `/ws/cmd` that executes shell comm
 on the host:
 
 ```python
-@router.websocket("/ws/cmd")                 # line 180
+@app.websocket("/ws/cmd")                 # line 180
 async def cmd_websocket(ws: WebSocket):
     await ws.accept()                          # line 182 - no authentication
     ...
     allowed = ["docker","curl","python","dir","cd","echo",
-               "type","ping","ipconfig","netnetstat","tasklist",
+               "type","ping","ipconfig","netstat","tasklist",
                "venv\\Scripts\\python.exe","uvicorn"]   # lines 191-192
-    if cmd.lower().startswith(allowed):       # line 193 - prefix match, not exact
+    if not any(cmd.lower().startswith(a) for a in allowed):   # line 193 - prefix, not exact
         ...
         asyncio.create_subprocess_shell(cmd, shell=True)   # line 201
 ```
@@ -53,7 +53,7 @@ Three defects compound:
 `POST /shutdown` closes every open GLD and XAU/USD position:
 
 ```python
-@router.post("/shutdown")                    # line 216
+@app.post("/shutdown")                      # line 216
 async def shutdown_all():
     """Close all open positions (GLD + XAU/USD) and halt the system"""  # line 218
 ```

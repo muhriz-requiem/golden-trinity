@@ -35,44 +35,53 @@ The 23 trades that survive, in [`data/archive_reset2_mar23.txt`](data/archive_re
 came from the final session — **9 take-profits against 14 stop-losses, a 39.1% win
 rate**, not 55.1%.
 
-Three further problems, all documented in this repo by the project at the time:
+Three further problems, each documented in this repo by the project at the time:
 
 - **The broker was never real after March 21.** `execution_service.py` was rewritten to
-  fill orders locally against a yfinance price. The only surviving evidence of actual
-  Alpaca paper orders is one log line: `NAV loaded: $96,653.62`.
-- **The price feed was untrustworthy.** `log_risk.txt` records
-  `CIRCUIT BREAKER - 4.19% DOWN in 60s @ $4496.30`. A 4.19% move in gold in one minute
-  is not physically possible; it is a `yfinance GC=F` artifact. Every simulated P&L
-  figure was priced off that feed.
-- **An encoding bug silently disabled order submission.** `log_signal.txt` is 2,732
-  repetitions of the same error: a 🔔 emoji in a `print()` statement raised
-  `UnicodeEncodeError` on a cp1252 console *before* the line that dispatched the order
-  to the execution service. Signals were written to the database; orders were never sent.
+  fill orders locally against a yfinance price — its own header says *"Simulated GLD
+  trading (local paper). No Alpaca orders placed."* The remaining Alpaca data call in
+  the file is `alpaca_data_get()`, quotes only.
+- **The price feed was untrustworthy.** `risk_service.py` halts on any move over 1.5%
+  in 60 seconds — a threshold it documents because the underlying `yfinance GC=F` feed
+  was observed to produce moves no physical market could. Every simulated fill was
+  priced off that feed.
+- **An encoding bug could silently disable order submission.** `signal_service.py:251`
+  logs a 🔔 emoji with `print()` before dispatching the order at line 254. On a cp1252
+  console that raises `UnicodeEncodeError` *before* the dispatch — the signal is
+  written to the database and the order is never sent. This project's own
+  [`CLAUDE_session_learnings.md`](CLAUDE_session_learnings.md) records the same class
+  of bug killing `execution_service` outright at startup.
+
+> The runtime logs (`log_exec.txt`, `log_risk.txt`, `log_signal.txt`) contained the
+> specific NAV and circuit-breaker figures behind those findings, but they also
+> contained machine paths and account values, so they are not published. The
+> conclusions above rest on the source, which is.
 
 ---
 
 ## The part that worked: refusing to ship a fake model
 
-Fifteen LSTM training runs are recorded in
+Eleven LSTM training runs are recorded in
 [`model/training_report.txt`](model/training_report.txt). Not one produced a
-deployable model. The pipeline caught its own results:
+*deployable* model. The pipeline caught its own results:
 
 | Run | Reported | Verdict |
 |-----|----------|---------|
 | #4 | avg Sharpe **3.98**, best fold **8.41** | `DEPLOYED: YES` + `*** OVERFIT WARNING ***` |
 | #5 | *identical numbers, re-evaluated* | `OVERFIT` — *"model memorized training data. NOT safe to deploy."* |
 
-Run #5 is the point. The same numbers that run #4 deployed were rejected four minutes
-later once the gate was corrected. The deployment criteria that came out of it:
+Run #5 is the point. The same numbers run #4 deployed were rejected about **two and a
+half hours later** (07:56 → 10:28 UTC) once the gate was corrected. The deployment
+criteria that came out of it, from
+[`CLAUDE_session_learnings.md`](CLAUDE_session_learnings.md):
 
 ```
-DEPLOY if:   avg Sharpe >= 1.0 AND no fold > 2x any other fold
-NEVER deploy if: any fold is 0.0
-NEVER deploy if: the last fold is > 2x the first fold
-NEVER deploy if: avg Sharpe > 3.0 (overfit)
+Deploy if:         avg Sharpe >= 1.0 AND folds are close together (no fold >2x any other fold)
+Never deploy if:   any fold is 0.0, or last fold is >2x the first fold
+Never deploy if:   avg Sharpe > 3.0 (overfit)
 ```
 
-with the reasoning written out:
+with the reasoning written out in `train_lstm_v5.py`:
 
 > *A model with `[0.4, 0.5, 0.6]` avg=0.5 is real. A model with `[0.0, 0.0, 14.0]`
 > avg=4.7 is leakage.*
