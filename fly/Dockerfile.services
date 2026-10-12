@@ -1,0 +1,43 @@
+# Dockerfile.services
+# Runs all 4 Python FastAPI services + health_monitor in one container
+# using supervisord to manage multiple processes
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system deps
+RUN apt-get update && apt-get install -y \
+    supervisor \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy Python files
+COPY macro_service.py .
+COPY risk_service.py .
+COPY execution_service.py .
+COPY signal_service.py .
+COPY health_monitor.py .
+COPY schema.sql .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir \
+    fastapi \
+    uvicorn \
+    httpx \
+    redis \
+    asyncpg \
+    python-dotenv \
+    numpy \
+    pandas \
+    yfinance \
+    requests \
+    torch --index-url https://download.pytorch.org/whl/cpu
+
+# Copy supervisord config
+COPY fly/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Expose all service ports
+EXPOSE 8001 8002 8003 8004
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

@@ -1,0 +1,16 @@
+# fly.redis.toml
+# Fly app for Redis
+# Deploy: fly deploy --config fly/fly.redis.toml
+
+app = "gt-redis"
+primary_region = "iad"
+
+[build]
+  image = "redis:7-alpine"
+
+[[services]]
+  internal_port = 6379
+  protocol      = "tcp"
+
+  [[services.ports]]
+    port = 6379

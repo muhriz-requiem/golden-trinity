@@ -1,0 +1,77 @@
+{
+  "name": "GT — Health Monitor",
+  "active": true,
+  "nodes": [
+    {
+      "id": "n1",
+      "name": "Every 5 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300],
+      "parameters": {
+        "rule": { "interval": [{ "field": "minutes", "minutesInterval": 5 }] }
+      }
+    },
+    {
+      "id": "n2",
+      "name": "Check All Services",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300],
+      "parameters": {
+        "jsCode": "const services = [\n  { name: 'macro_service',     url: 'http://host.docker.internal:8001/api/health' },\n  { name: 'risk_service',      url: 'http://host.docker.internal:8002/api/health' },\n  { name: 'execution_service', url: 'http://host.docker.internal:8003/api/health' },\n  { name: 'signal_service',    url: 'http://host.docker.internal:8004/api/health' },\n  { name: 'xauusd_service',    url: 'http://host.docker.internal:8005/api/health' }\n];\nconst results = [];\nfor (const svc of services) {\n  try {\n    const r = await this.helpers.httpRequest({ method: 'GET', url: svc.url, timeout: 5000 });\n    let extra = '';\n    if (svc.name === 'execution_service' && r.daily_pnl_pct != null) {\n      extra = ' pnl=' + (r.daily_pnl_pct * 100).toFixed(2) + '%';\n    }\n    if (svc.name === 'signal_service') {\n      extra = ' ' + (r.model || '?') + ' buf=' + (r.buffer_size || 0) + '/60';\n      if (r.collapse_alert) extra += ' COLLAPSE!';\n    }\n    if (svc.name === 'xauusd_service') {\n      extra = ' xau=$' + (r.last_price || 0).toFixed(1);\n    }\n    results.push({ name: svc.name, ok: r.status === 'healthy', latency: r.latency_ms, extra });\n  } catch(e) {\n    results.push({ name: svc.name, ok: false, latency: null, extra: '', error: e.message });\n  }\n}\nconst failed = results.filter(r => !r.ok);\nconst allOk = failed.length === 0;\nconst lines = results.map(r =>\n  (r.ok ? '\\u2705' : '\\u274c') + ' ' + r.name +\n  (r.latency ? ' \\u2014 ' + r.latency + 'ms' : ' \\u2014 DOWN') +\n  r.extra\n);\nconst ts = new Date().toISOString().replace('T',' ').substring(0,19) + ' UTC';\nreturn [{ json: { allOk, failedNames: failed.map(f=>f.name).join(', '), message: lines.join('\\n'), timestamp: ts } }];"
+      }
+    },
+    {
+      "id": "n3",
+      "name": "Post to gt-health",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [760, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_HEALTH }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [{ "name": "content", "value": "={{ ($json.allOk ? '\uD83D\uDFE2' : '\uD83D\uDD34') + ' **GT Health** \u2014 ' + $json.timestamp + '\\n' + $json.message }}" }]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "n4",
+      "name": "Any Down?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1000, 300],
+      "parameters": {
+        "conditions": {
+          "boolean": [{ "value1": "={{ $json.allOk }}", "value2": false }]
+        }
+      }
+    },
+    {
+      "id": "n5",
+      "name": "Alert gt-alerts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1240, 420],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_ALERTS }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [{ "name": "content", "value": "=@everyone \uD83D\uDEA8 GT SERVICE DOWN: {{ $json.failedNames }}" }]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Every 5 Minutes":   { "main": [[{ "node": "Check All Services", "type": "main", "index": 0 }]] },
+    "Check All Services": { "main": [[{ "node": "Post to gt-health",  "type": "main", "index": 0 }]] },
+    "Post to gt-health":  { "main": [[{ "node": "Any Down?",          "type": "main", "index": 0 }]] },
+    "Any Down?":          { "main": [[], [{ "node": "Alert gt-alerts", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}

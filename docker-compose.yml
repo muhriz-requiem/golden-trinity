@@ -1,0 +1,54 @@
+version: '3.8'
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg15
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: goldentrinity
+      POSTGRES_USER: gt_user
+      POSTGRES_PASSWORD: ${DB_PASS}
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+      - DISCORD_WEBHOOK_ALERTS=${DISCORD_WEBHOOK_ALERTS}
+      - DISCORD_WEBHOOK_TRADES=${DISCORD_WEBHOOK_TRADES}
+      - DISCORD_WEBHOOK_REPORTS=${DISCORD_WEBHOOK_REPORTS}
+      - DISCORD_WEBHOOK_HEALTH=${DISCORD_WEBHOOK_HEALTH}
+      - FRED_API_KEY=${FRED_API_KEY}
+      - NEWS_API_KEY=${NEWS_API_KEY}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    restart: unless-stopped
+
+volumes:
+  timescale_data:
+  n8n_data:
+  grafana_data:

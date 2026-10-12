@@ -1,0 +1,13 @@
+{
+  "trained_at": "2026-03-15T03:30:41.919803",
+  "fold_sharpes": [
+    -42.524,
+    -50.512,
+    -22.156
+  ],
+  "avg_sharpe": -38.397,
+  "best_sharpe": -22.156,
+  "forward_bars": 15,
+  "threshold_pct": 0.0015,
+  "bars": 132044
+}

@@ -1,0 +1,739 @@
+
+========================================================================
+TRAINING RUN #1  |  2026-03-18 01:06:34 UTC  |  SOURCE: TEST
+========================================================================
+
+CONFIG:       test_config
+VERDICT:      MARGINAL  —  Above deployment threshold (0.3) but weak. Rule-based may be better.
+DEPLOYED:     NO
+
+------------------------------------------------------------------------
+SHARPE RESULTS
+------------------------------------------------------------------------
+Avg Sharpe (real metric):  0.4500
+Fold Sharpes:              [0.42, 0.55, 0.38]
+Best fold:                 0.5500
+Worst fold:                0.3800
+Fold spread (max-min):     0.1700
+
+------------------------------------------------------------------------
+INTERPRETATION
+------------------------------------------------------------------------
+Target avg Sharpe:   1.5 - 2.0   (strong, deployable)
+Minimum to deploy:   > 0.3        (any positive edge)
+Overfitting flag:    any fold > 2.0
+Fold consistency:    spread < 1.0 preferred
+
+IF avg < 0.3:  Model has no consistent edge. Keep rule-based signals.
+              Possible causes:
+              - Too few training samples (need more paper trading data)
+              - Label threshold too tight or too loose
+              - Forward window too short/long for current volatility
+
+IF folds inconsistent: Model memorizes specific regimes but can't generalise.
+              Possible causes:
+              - Overfitting to one market period
+              - Data too homogeneous (need more regime variety)
+
+IF overfit warning: Best fold Sharpe above 2.0 is suspicious.
+              Could still be real if market was trending strongly.
+              Watch live performance closely if deployed.
+
+------------------------------------------------------------------------
+DATA USED
+------------------------------------------------------------------------
+  bars_5min                    26000
+  live_trades                  23
+  timeframe                    5min
+
+------------------------------------------------------------------------
+TRAINING DETAILS
+------------------------------------------------------------------------
+  epochs_to_converge           [47, 60, 31]
+  trades_in_val                [120, 145, 98]
+
+------------------------------------------------------------------------
+NEXT STEPS
+------------------------------------------------------------------------
+  1. Model NOT deployed — rule-based signals continue unchanged
+  2. Accumulate more paper trading data (run update_training_data.py weekly)
+  3. Current live trades: 23 — target 200+ before LSTM will be reliable
+  4. Next auto-retrain will fire in ~6 hours (continuous) or run manually
+
+========================================================================
+
+========================================================================
+TRAINING RUN #2  |  2026-03-18 01:10:34 UTC  |  SOURCE: TEST
+========================================================================
+
+CONFIG:       test_cfg
+VERDICT:      MARGINAL  —  Above deployment threshold (0.3) but weak. Rule-based may be better.
+DEPLOYED:     NO
+
+------------------------------------------------------------------------
+SHARPE RESULTS
+------------------------------------------------------------------------
+Avg Sharpe (real metric):  0.4500
+Fold Sharpes:              [0.42, 0.55, 0.38]
+Best fold:                 0.5500
+Worst fold:                0.3800
+Fold spread (max-min):     0.1700
+
+------------------------------------------------------------------------
+INTERPRETATION
+------------------------------------------------------------------------
+Target avg Sharpe:   1.5 - 2.0   (strong, deployable)
+Minimum to deploy:   > 0.3        (any positive edge)
+Overfitting flag:    any fold > 2.0
+Fold consistency:    spread < 1.0 preferred
+
+IF avg < 0.3:  Model has no consistent edge. Keep rule-based signals.
+              Possible causes:
+              - Too few training samples (need more paper trading data)
+              - Label threshold too tight or too loose
+              - Forward window too short/long for current volatility
+
+IF folds inconsistent: Model memorizes specific regimes but can't generalise.
+              Possible causes:
+              - Overfitting to one market period
+              - Data too homogeneous (need more regime variety)
+
+IF overfit warning: Best fold Sharpe above 2.0 is suspicious.
+              Could still be real if market was trending strongly.
+              Watch live performance closely if deployed.
+
+------------------------------------------------------------------------
+DATA USED
+------------------------------------------------------------------------
+  bars_5min                    26000
+  live_trades                  23
+
+------------------------------------------------------------------------
+TRAINING DETAILS
+------------------------------------------------------------------------
+  epochs                       60
+
+------------------------------------------------------------------------
+NEXT STEPS
+------------------------------------------------------------------------
+  1. Model NOT deployed — rule-based signals continue unchanged
+  2. Accumulate more paper trading data (run update_training_data.py weekly)
+  3. Current live trades: 23 — target 200+ before LSTM will be reliable
+  4. Next auto-retrain will fire in ~6 hours (continuous) or run manually
+
+========================================================================
+
+========================================================================
+TRAINING RUN #3  |  2026-03-18 01:14:46 UTC  |  SOURCE: TEST
+========================================================================
+
+CONFIG:       test_v5
+VERDICT:      BELOW_THRESHOLD  —  Positive Sharpe but below 0.3 deployment threshold. Model NOT deployed.
+DEPLOYED:     NO
+
+------------------------------------------------------------------------
+SHARPE RESULTS
+------------------------------------------------------------------------
+Avg Sharpe (real metric):  0.2800
+Fold Sharpes:              [0.42, 0.55, -0.12]
+Best fold:                 0.5500
+Worst fold:                -0.1200
+Fold spread (max-min):     0.6700
+
+------------------------------------------------------------------------
+INTERPRETATION
+------------------------------------------------------------------------
+Target avg Sharpe:   1.5 - 2.0   (strong, deployable)
+Minimum to deploy:   > 0.3        (any positive edge)
+Overfitting flag:    any fold > 2.0
+Fold consistency:    spread < 1.0 preferred
+
+IF avg < 0.3:  Model has no consistent edge. Keep rule-based signals.
+              Possible causes:
+              - Too few training samples (need more paper trading data)
+              - Label threshold too tight or too loose
+              - Forward window too short/long for current volatility
+
+IF folds inconsistent: Model memorizes specific regimes but can't generalise.
+              Possible causes:
+              - Overfitting to one market period
+              - Data too homogeneous (need more regime variety)
+
+IF overfit warning: Best fold Sharpe above 2.0 is suspicious.
+              Could still be real if market was trending strongly.
+              Watch live performance closely if deployed.
+
+------------------------------------------------------------------------
+DATA USED
+------------------------------------------------------------------------
+  bars_5min                    26000
+  live_trades                  23
+
+------------------------------------------------------------------------
+TRAINING DETAILS
+------------------------------------------------------------------------
+  epochs                       60
+
+------------------------------------------------------------------------
+NEXT STEPS
+------------------------------------------------------------------------
+  1. Model NOT deployed — rule-based signals continue unchanged
+  2. Accumulate more paper trading data (run update_training_data.py weekly)
+  3. Current live trades: 23 — target 200+ before LSTM will be reliable
+  4. Next auto-retrain will fire in ~6 hours (continuous) or run manually
+
+========================================================================
+
+========================================================================
+TRAINING RUN #4  |  2026-03-18 07:56:30 UTC  |  SOURCE: CONTINUOUS
+========================================================================
+
+CONFIG:       continuous
+VERDICT:      EXCELLENT  —  Target range (1.5-2.0). Model is strong.
+DEPLOYED:     YES — model hot-swapped into production
+
+------------------------------------------------------------------------
+SHARPE RESULTS
+------------------------------------------------------------------------
+Avg Sharpe (real metric):  3.9805
+Fold Sharpes:              [0.8567, 2.6707, 8.4139]
+Best fold:                 8.4139
+Worst fold:                0.8567
+Fold spread (max-min):     7.5571
+  *** OVERFIT WARNING: max fold Sharpe 8.414 > 2.0 ***
+  *** CONSISTENCY WARNING: fold spread 7.557 > 1.0 — unstable results ***
+
+------------------------------------------------------------------------
+INTERPRETATION
+------------------------------------------------------------------------
+Target avg Sharpe:   1.5 - 2.0   (strong, deployable)
+Minimum to deploy:   > 0.3        (any positive edge)
+Overfitting flag:    any fold > 2.0
+Fold consistency:    spread < 1.0 preferred
+
+IF avg < 0.3:  Model has no consistent edge. Keep rule-based signals.
+              Possible causes:
+              - Too few training samples (need more paper trading data)
+              - Label threshold too tight or too loose
+              - Forward window too short/long for current volatility
+
+IF folds inconsistent: Model memorizes specific regimes but can't generalise.
+              Possible causes:
+              - Overfitting to one market period
+              - Data too homogeneous (need more regime variety)
+
+IF overfit warning: Best fold Sharpe above 2.0 is suspicious.
+              Could still be real if market was trending strongly.
+              Watch live performance closely if deployed.
+
+------------------------------------------------------------------------
+DATA USED
+------------------------------------------------------------------------
+  bars_5min                    36902
+  live_xauusd_bars             209
+  live_trades                  0
+  forward                      6
+  window                       60
+  percentile                   35
+  device                       cpu
+
+------------------------------------------------------------------------
+TRAINING DETAILS
+------------------------------------------------------------------------
+  epochs                       60
+  sim_high                     0.4
+  sim_low                      0.3
+  retrain_every_h              6
+
+------------------------------------------------------------------------
+NEXT STEPS
+------------------------------------------------------------------------
+  1. Monitor live signal quality over next 2-3 trading days
+  2. Compare LSTM trade P&L vs rule-based P&L in daily reports
+  3. If performance degrades, run: python close_all_positions.py
+     then rename model\lstm_model.pt to lstm_model.pt.bak
+
+========================================================================
+
+========================================================================
+TRAINING RUN #5  |  2026-03-18 10:28:12 UTC  |  SOURCE: CONTINUOUS_TEST
+========================================================================
+
+CONFIG:       continuous
+VERDICT:      OVERFIT  —  Avg 3.981 or max fold 8.414 exceeds 2.0 — model memorized training data. NOT safe to deploy.
+DEPLOYED:     NO
+
+------------------------------------------------------------------------
+SHARPE RESULTS
+------------------------------------------------------------------------
+Avg Sharpe (real metric):  3.9805
+Fold Sharpes:              [0.8567, 2.6707, 8.4139]
+Best fold:                 8.4139
+Worst fold:                0.8567
+Fold spread (max-min):     7.5572
+  *** OVERFIT WARNING: max fold Sharpe 8.414 > 2.0 ***
+  *** CONSISTENCY WARNING: fold spread 7.557 > 1.0 — unstable results ***
+
+------------------------------------------------------------------------
+INTERPRETATION
+------------------------------------------------------------------------
+Target avg Sharpe:   1.5 - 2.0   (strong, deployable)
+Minimum to deploy:   > 0.3        (any positive edge)
+Overfitting flag:    any fold > 2.0
+Fold consistency:    spread < 1.0 preferred
+
+IF avg < 0.3:  Model has no consistent edge. Keep rule-based signals.
+              Possible causes:
+              - Too few training samples (need more paper trading data)
+              - Label threshold too tight or too loose
+              - Forward window too short/long for current volatility
+
+IF folds inconsistent: Model memorizes specific regimes but can't generalise.
+              Possible causes:
+              - Overfitting to one market period
+              - Data too homogeneous (need more regime variety)
+
+IF overfit warning: Best fold Sharpe above 2.0 is suspicious.
+              Could still be real if market was trending strongly.
+              Watch live performance closely if deployed.
+
+------------------------------------------------------------------------
+DATA USED
+------------------------------------------------------------------------
+  bars_5min                    36902
+  live_xauusd_bars             209
+  live_trades                  0
+
+------------------------------------------------------------------------
+TRAINING DETAILS
+------------------------------------------------------------------------
+  sim_high                     0.4
+  sim_low                      0.3
+
+------------------------------------------------------------------------
+NEXT STEPS
+------------------------------------------------------------------------
+  1. Model NOT deployed — rule-based signals continue unchanged
+  2. Accumulate more paper trading data (run update_training_data.py weekly)
+  3. Current live trades: 0 — target 200+ before LSTM will be reliable
+  4. Next auto-retrain will fire in ~6 hours (continuous) or run manually
+
+========================================================================
+
+========================================================================
+TRAINING RUN #6  |  2026-03-18 10:32:15 UTC  |  SOURCE: TEST
+========================================================================
+
+CONFIG:       test_config
+VERDICT:      MARGINAL  —  Above deployment threshold (0.3) but weak. Rule-based may be better.
+DEPLOYED:     NO
+
+------------------------------------------------------------------------
+SHARPE RESULTS
+------------------------------------------------------------------------
+Avg Sharpe (real metric):  0.4500
+Fold Sharpes:              [0.42, 0.55, 0.38]
+Best fold:                 0.5500
+Worst fold:                0.3800
+Fold spread (max-min):     0.1700
+
+------------------------------------------------------------------------
+INTERPRETATION
+------------------------------------------------------------------------
+Target avg Sharpe:   1.5 - 2.0   (strong, deployable)
+Minimum to deploy:   > 0.3        (any positive edge)
+Overfitting flag:    any fold > 2.0
+Fold consistency:    spread < 1.0 preferred
+
+IF avg < 0.3:  Model has no consistent edge. Keep rule-based signals.
+              Possible causes:
+              - Too few training samples (need more paper trading data)
+              - Label threshold too tight or too loose
+              - Forward window too short/long for current volatility
+
+IF folds inconsistent: Model memorizes specific regimes but can't generalise.
+              Possible causes:
+              - Overfitting to one market period
+              - Data too homogeneous (need more regime variety)
+
+IF overfit warning: Best fold Sharpe above 2.0 is suspicious.
+              Could still be real if market was trending strongly.
+              Watch live performance closely if deployed.
+
+------------------------------------------------------------------------
+DATA USED
+------------------------------------------------------------------------
+  bars_5min                    26000
+  live_trades                  23
+  timeframe                    5min
+
+------------------------------------------------------------------------
+TRAINING DETAILS
+------------------------------------------------------------------------
+  epochs_to_converge           [47, 60, 31]
+  trades_in_val                [120, 145, 98]
+
+------------------------------------------------------------------------
+NEXT STEPS
+------------------------------------------------------------------------
+  1. Model NOT deployed — rule-based signals continue unchanged
+  2. Accumulate more paper trading data (run update_training_data.py weekly)
+  3. Current live trades: 23 — target 200+ before LSTM will be reliable
+  4. Next auto-retrain will fire in ~6 hours (continuous) or run manually
+
+========================================================================
+
+========================================================================
+TRAINING RUN #7  |  2026-03-18 13:59:41 UTC  |  SOURCE: CONTINUOUS
+========================================================================
+
+CONFIG:       continuous
+VERDICT:      EXCELLENT  —  Target range (1.5-2.0). Model is strong.
+DEPLOYED:     YES — model hot-swapped into production
+
+------------------------------------------------------------------------
+SHARPE RESULTS
+------------------------------------------------------------------------
+Avg Sharpe (real metric):  2.8969
+Fold Sharpes:              [0.7454, 3.9143, 4.031]
+Best fold:                 4.0310
+Worst fold:                0.7454
+Fold spread (max-min):     3.2856
+  *** OVERFIT WARNING: max fold Sharpe 4.031 > 2.0 ***
+  *** CONSISTENCY WARNING: fold spread 3.286 > 1.0 — unstable results ***
+
+------------------------------------------------------------------------
+INTERPRETATION
+------------------------------------------------------------------------
+Target avg Sharpe:   1.5 - 2.0   (strong, deployable)
+Minimum to deploy:   > 0.3        (any positive edge)
+Overfitting flag:    any fold > 2.0
+Fold consistency:    spread < 1.0 preferred
+
+IF avg < 0.3:  Model has no consistent edge. Keep rule-based signals.
+              Possible causes:
+              - Too few training samples (need more paper trading data)
+              - Label threshold too tight or too loose
+              - Forward window too short/long for current volatility
+
+IF folds inconsistent: Model memorizes specific regimes but can't generalise.
+              Possible causes:
+              - Overfitting to one market period
+              - Data too homogeneous (need more regime variety)
+
+IF overfit warning: Best fold Sharpe above 2.0 is suspicious.
+              Could still be real if market was trending strongly.
+              Watch live performance closely if deployed.
+
+------------------------------------------------------------------------
+DATA USED
+------------------------------------------------------------------------
+  bars_5min                    36975
+  live_xauusd_bars             281
+  live_trades                  0
+  forward                      6
+  window                       60
+  percentile                   35
+  device                       cpu
+
+------------------------------------------------------------------------
+TRAINING DETAILS
+------------------------------------------------------------------------
+  epochs                       60
+  sim_high                     0.4
+  sim_low                      0.3
+  retrain_every_h              6
+
+------------------------------------------------------------------------
+NEXT STEPS
+------------------------------------------------------------------------
+  1. Monitor live signal quality over next 2-3 trading days
+  2. Compare LSTM trade P&L vs rule-based P&L in daily reports
+  3. If performance degrades, run: python close_all_positions.py
+     then rename model\lstm_model.pt to lstm_model.pt.bak
+
+========================================================================
+
+========================================================================
+TRAINING RUN #8  |  2026-03-18 20:03:46 UTC  |  SOURCE: CONTINUOUS
+========================================================================
+
+CONFIG:       continuous
+VERDICT:      EXCELLENT  —  Target range (1.5-2.0). Model is strong.
+DEPLOYED:     YES — model hot-swapped into production
+
+------------------------------------------------------------------------
+SHARPE RESULTS
+------------------------------------------------------------------------
+Avg Sharpe (real metric):  2.5792
+Fold Sharpes:              [2.4414, 0.763, 4.5332]
+Best fold:                 4.5332
+Worst fold:                0.7630
+Fold spread (max-min):     3.7702
+  *** OVERFIT WARNING: max fold Sharpe 4.533 > 2.0 ***
+  *** CONSISTENCY WARNING: fold spread 3.770 > 1.0 — unstable results ***
+
+------------------------------------------------------------------------
+INTERPRETATION
+------------------------------------------------------------------------
+Target avg Sharpe:   1.5 - 2.0   (strong, deployable)
+Minimum to deploy:   > 0.3        (any positive edge)
+Overfitting flag:    any fold > 2.0
+Fold consistency:    spread < 1.0 preferred
+
+IF avg < 0.3:  Model has no consistent edge. Keep rule-based signals.
+              Possible causes:
+              - Too few training samples (need more paper trading data)
+              - Label threshold too tight or too loose
+              - Forward window too short/long for current volatility
+
+IF folds inconsistent: Model memorizes specific regimes but can't generalise.
+              Possible causes:
+              - Overfitting to one market period
+              - Data too homogeneous (need more regime variety)
+
+IF overfit warning: Best fold Sharpe above 2.0 is suspicious.
+              Could still be real if market was trending strongly.
+              Watch live performance closely if deployed.
+
+------------------------------------------------------------------------
+DATA USED
+------------------------------------------------------------------------
+  bars_5min                    37047
+  live_xauusd_bars             354
+  live_trades                  0
+  forward                      6
+  window                       60
+  percentile                   35
+  device                       cpu
+
+------------------------------------------------------------------------
+TRAINING DETAILS
+------------------------------------------------------------------------
+  epochs                       60
+  sim_high                     0.4
+  sim_low                      0.3
+  retrain_every_h              6
+
+------------------------------------------------------------------------
+NEXT STEPS
+------------------------------------------------------------------------
+  1. Monitor live signal quality over next 2-3 trading days
+  2. Compare LSTM trade P&L vs rule-based P&L in daily reports
+  3. If performance degrades, run: python close_all_positions.py
+     then rename model\lstm_model.pt to lstm_model.pt.bak
+
+========================================================================
+
+========================================================================
+TRAINING RUN #9  |  2026-03-19 07:25:14 UTC  |  SOURCE: CONTINUOUS
+========================================================================
+
+CONFIG:       continuous
+VERDICT:      OVERFIT  —  Avg 3.015 or max fold 4.446 exceeds 2.0 — model memorized training data. NOT safe to deploy.
+DEPLOYED:     NO
+
+------------------------------------------------------------------------
+SHARPE RESULTS
+------------------------------------------------------------------------
+Avg Sharpe (real metric):  3.0150
+Fold Sharpes:              [0.987, 3.6115, 4.4464]
+Best fold:                 4.4464
+Worst fold:                0.9870
+Fold spread (max-min):     3.4594
+  *** OVERFIT WARNING: max fold Sharpe 4.446 > 2.0 ***
+  *** CONSISTENCY WARNING: fold spread 3.459 > 1.0 — unstable results ***
+
+------------------------------------------------------------------------
+INTERPRETATION
+------------------------------------------------------------------------
+Target avg Sharpe:   1.5 - 2.0   (strong, deployable)
+Minimum to deploy:   > 0.3        (any positive edge)
+Overfitting flag:    any fold > 2.0
+Fold consistency:    spread < 1.0 preferred
+
+IF avg < 0.3:  Model has no consistent edge. Keep rule-based signals.
+              Possible causes:
+              - Too few training samples (need more paper trading data)
+              - Label threshold too tight or too loose
+              - Forward window too short/long for current volatility
+
+IF folds inconsistent: Model memorizes specific regimes but can't generalise.
+              Possible causes:
+              - Overfitting to one market period
+              - Data too homogeneous (need more regime variety)
+
+IF overfit warning: Best fold Sharpe above 2.0 is suspicious.
+              Could still be real if market was trending strongly.
+              Watch live performance closely if deployed.
+
+------------------------------------------------------------------------
+DATA USED
+------------------------------------------------------------------------
+  bars_5min                    37151
+  live_xauusd_bars             458
+  live_trades                  0
+  forward                      6
+  window                       60
+  percentile                   35
+  device                       cpu
+
+------------------------------------------------------------------------
+TRAINING DETAILS
+------------------------------------------------------------------------
+  epochs                       60
+  sim_high                     0.4
+  sim_low                      0.3
+  retrain_every_h              6
+
+------------------------------------------------------------------------
+NEXT STEPS
+------------------------------------------------------------------------
+  1. Model NOT deployed — rule-based signals continue unchanged
+  2. Accumulate more paper trading data (run update_training_data.py weekly)
+  3. Current live trades: 0 — target 200+ before LSTM will be reliable
+  4. Next auto-retrain will fire in ~6 hours (continuous) or run manually
+
+========================================================================
+
+========================================================================
+TRAINING RUN #10  |  2026-03-23 05:30:43 UTC  |  SOURCE: CONTINUOUS
+========================================================================
+
+CONFIG:       continuous
+VERDICT:      OVERFIT  —  Avg 4.034 or max fold 8.698 exceeds 2.0 — model memorized training data. NOT safe to deploy.
+DEPLOYED:     NO
+
+------------------------------------------------------------------------
+SHARPE RESULTS
+------------------------------------------------------------------------
+Avg Sharpe (real metric):  4.0341
+Fold Sharpes:              [2.3091, 1.0955, 8.6976]
+Best fold:                 8.6976
+Worst fold:                1.0955
+Fold spread (max-min):     7.6021
+  *** OVERFIT WARNING: max fold Sharpe 8.698 > 2.0 ***
+  *** CONSISTENCY WARNING: fold spread 7.602 > 1.0 — unstable results ***
+
+------------------------------------------------------------------------
+INTERPRETATION
+------------------------------------------------------------------------
+Target avg Sharpe:   1.5 - 2.0   (strong, deployable)
+Minimum to deploy:   > 0.3        (any positive edge)
+Overfitting flag:    any fold > 2.0
+Fold consistency:    spread < 1.0 preferred
+
+IF avg < 0.3:  Model has no consistent edge. Keep rule-based signals.
+              Possible causes:
+              - Too few training samples (need more paper trading data)
+              - Label threshold too tight or too loose
+              - Forward window too short/long for current volatility
+
+IF folds inconsistent: Model memorizes specific regimes but can't generalise.
+              Possible causes:
+              - Overfitting to one market period
+              - Data too homogeneous (need more regime variety)
+
+IF overfit warning: Best fold Sharpe above 2.0 is suspicious.
+              Could still be real if market was trending strongly.
+              Watch live performance closely if deployed.
+
+------------------------------------------------------------------------
+DATA USED
+------------------------------------------------------------------------
+  bars_5min                    37346
+  live_xauusd_bars             655
+  live_trades                  0
+  forward                      6
+  window                       60
+  percentile                   35
+  device                       cpu
+
+------------------------------------------------------------------------
+TRAINING DETAILS
+------------------------------------------------------------------------
+  epochs                       60
+  sim_high                     0.4
+  sim_low                      0.3
+  retrain_every_h              6
+
+------------------------------------------------------------------------
+NEXT STEPS
+------------------------------------------------------------------------
+  1. Model NOT deployed — rule-based signals continue unchanged
+  2. Accumulate more paper trading data (run update_training_data.py weekly)
+  3. Current live trades: 0 — target 200+ before LSTM will be reliable
+  4. Next auto-retrain will fire in ~6 hours (continuous) or run manually
+
+========================================================================
+
+========================================================================
+TRAINING RUN #11  |  2026-03-23 11:34:55 UTC  |  SOURCE: CONTINUOUS
+========================================================================
+
+CONFIG:       continuous
+VERDICT:      OVERFIT  —  Avg 1.936 or max fold 3.206 exceeds 2.0 — model memorized training data. NOT safe to deploy.
+DEPLOYED:     NO
+
+------------------------------------------------------------------------
+SHARPE RESULTS
+------------------------------------------------------------------------
+Avg Sharpe (real metric):  1.9357
+Fold Sharpes:              [0.0, 3.2063, 2.6009]
+Best fold:                 3.2063
+Worst fold:                0.0000
+Fold spread (max-min):     3.2063
+  *** OVERFIT WARNING: max fold Sharpe 3.206 > 2.0 ***
+  *** CONSISTENCY WARNING: fold spread 3.206 > 1.0 — unstable results ***
+
+------------------------------------------------------------------------
+INTERPRETATION
+------------------------------------------------------------------------
+Target avg Sharpe:   1.5 - 2.0   (strong, deployable)
+Minimum to deploy:   > 0.3        (any positive edge)
+Overfitting flag:    any fold > 2.0
+Fold consistency:    spread < 1.0 preferred
+
+IF avg < 0.3:  Model has no consistent edge. Keep rule-based signals.
+              Possible causes:
+              - Too few training samples (need more paper trading data)
+              - Label threshold too tight or too loose
+              - Forward window too short/long for current volatility
+
+IF folds inconsistent: Model memorizes specific regimes but can't generalise.
+              Possible causes:
+              - Overfitting to one market period
+              - Data too homogeneous (need more regime variety)
+
+IF overfit warning: Best fold Sharpe above 2.0 is suspicious.
+              Could still be real if market was trending strongly.
+              Watch live performance closely if deployed.
+
+------------------------------------------------------------------------
+DATA USED
+------------------------------------------------------------------------
+  bars_5min                    37419
+  live_xauusd_bars             727
+  live_trades                  0
+  forward                      6
+  window                       60
+  percentile                   35
+  device                       cpu
+
+------------------------------------------------------------------------
+TRAINING DETAILS
+------------------------------------------------------------------------
+  epochs                       60
+  sim_high                     0.4
+  sim_low                      0.3
+  retrain_every_h              6
+
+------------------------------------------------------------------------
+NEXT STEPS
+------------------------------------------------------------------------
+  1. Model NOT deployed — rule-based signals continue unchanged
+  2. Accumulate more paper trading data (run update_training_data.py weekly)
+  3. Current live trades: 0 — target 200+ before LSTM will be reliable
+  4. Next auto-retrain will fire in ~6 hours (continuous) or run manually
+
+========================================================================

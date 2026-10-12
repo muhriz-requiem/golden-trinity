@@ -1,0 +1,28 @@
+# fly.timescaledb.toml
+# Fly app for TimescaleDB (PostgreSQL with time-series extension)
+# Deploy: fly deploy --config fly/fly.timescaledb.toml
+
+app = "gt-timescaledb"
+primary_region = "iad"   # US East — change to nearest: lhr=London, nrt=Tokyo, syd=Sydney
+
+[build]
+  image = "timescale/timescaledb:latest-pg15"
+
+[env]
+  POSTGRES_DB   = "goldentrinity"
+  POSTGRES_USER = "gt_user"
+
+# POSTGRES_PASSWORD is set as a Fly secret (not here)
+# Run: fly secrets set POSTGRES_PASSWORD=<redacted> --app gt-timescaledb
+# (The original value was a real credential and has been redacted and rotated.)
+
+[[services]]
+  internal_port = 5432
+  protocol      = "tcp"
+
+  [[services.ports]]
+    port = 5432
+
+[mounts]
+  source      = "timescale_data"
+  destination = "/var/lib/postgresql/data"

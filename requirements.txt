@@ -1,0 +1,28 @@
+# Runtime dependencies for GoldenTrinity.
+#
+# Recovered from install_deps.bat. This project never shipped a requirements file;
+# that is one of the process gaps noted in the README.
+#
+# Requires Python 3.10+ (PEP 604 `X | None` syntax is used throughout).
+
+# --- services ---
+fastapi
+uvicorn
+httpx
+redis
+asyncpg
+python-dotenv
+requests
+
+# --- market / macro data ---
+yfinance
+pandas
+numpy
+lightgbm
+
+# --- broker ---
+alpaca-py
+
+# --- ML (LSTM training; not required to run the rule-based signal path) ---
+# torch
+# scikit-learn

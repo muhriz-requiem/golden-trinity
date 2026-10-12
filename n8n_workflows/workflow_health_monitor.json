@@ -1,0 +1,119 @@
+{
+  "name": "GT — Health Monitor",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "minutes", "minutesInterval": 5 }] }
+      },
+      "name": "Every 5 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8001/api/health",
+        "options": { "timeout": 5000 }
+      },
+      "name": "Check Macro Service",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 180]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8002/api/health",
+        "options": { "timeout": 5000 }
+      },
+      "name": "Check Risk Service",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8003/api/health",
+        "options": { "timeout": 5000 }
+      },
+      "name": "Check Execution Service",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 420]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8004/api/health",
+        "options": { "timeout": 5000 }
+      },
+      "name": "Check Signal Service",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 540]
+    },
+    {
+      "parameters": {
+        "jsCode": "const services = [\n  { name: 'macro_service',     data: $('Check Macro Service').first().json },\n  { name: 'risk_service',      data: $('Check Risk Service').first().json },\n  { name: 'execution_service', data: $('Check Execution Service').first().json },\n  { name: 'signal_service',    data: $('Check Signal Service').first().json }\n];\n\nconst failed = services.filter(s => s.data.status !== 'healthy');\nconst allOk  = failed.length === 0;\n\nconst lines = services.map(s => {\n  const ok = s.data.status === 'healthy';\n  return `${ok ? '✅' : '❌'} ${s.name} — ${ok ? s.data.latency_ms + 'ms' : 'UNHEALTHY'}`;\n});\n\nreturn [{ json: { allOk, failed, message: lines.join('\\n'), timestamp: new Date().toISOString() } }];"
+      },
+      "name": "Evaluate Health",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 360]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.DISCORD_WEBHOOK_HEALTH }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [{
+            "name": "content",
+            "value": "=🟢 GoldenTrinity Health Check\\n{{ $json.message }}\\n{{ $json.timestamp }}"
+          }]
+        },
+        "options": {}
+      },
+      "name": "Discord Health OK",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [940, 260]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.DISCORD_WEBHOOK_ALERTS }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [{
+            "name": "content",
+            "value": "=@everyone 🚨 GoldenTrinity Service DOWN\\n{{ $json.message }}\\n{{ $json.timestamp }}"
+          }]
+        },
+        "options": {}
+      },
+      "name": "Discord Alert Failure",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [940, 460]
+    }
+  ],
+  "connections": {
+    "Every 5 Minutes": {
+      "main": [[
+        { "node": "Check Macro Service", "type": "main", "index": 0 },
+        { "node": "Check Risk Service", "type": "main", "index": 0 },
+        { "node": "Check Execution Service", "type": "main", "index": 0 },
+        { "node": "Check Signal Service", "type": "main", "index": 0 }
+      ]]
+    },
+    "Check Macro Service":     { "main": [[{ "node": "Evaluate Health", "type": "main", "index": 0 }]] },
+    "Check Risk Service":      { "main": [[{ "node": "Evaluate Health", "type": "main", "index": 0 }]] },
+    "Check Execution Service": { "main": [[{ "node": "Evaluate Health", "type": "main", "index": 0 }]] },
+    "Check Signal Service":    { "main": [[{ "node": "Evaluate Health", "type": "main", "index": 0 }]] },
+    "Evaluate Health": {
+      "main": [
+        [{ "node": "Discord Health OK",    "type": "main", "index": 0 }],
+        [{ "node": "Discord Alert Failure","type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" }
+}

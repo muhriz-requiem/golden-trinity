@@ -1,0 +1,44 @@
+# fly.n8n.toml
+# Fly app for n8n orchestration
+# Deploy: fly deploy --config fly/fly.n8n.toml
+
+app = "gt-n8n"
+primary_region = "iad"
+
+[build]
+  image = "n8nio/n8n:latest"
+
+[env]
+  N8N_PORT     = "5678"
+  N8N_PROTOCOL = "http"
+  N8N_HOST     = "0.0.0.0"
+  # WEBHOOK_URL must be updated after deploy with your actual Fly URL:
+  # fly secrets set WEBHOOK_URL=https://gt-n8n.fly.dev/ --app gt-n8n
+
+# All secrets set via: fly secrets set KEY=VALUE --app gt-n8n
+# Required secrets:
+#   N8N_ENCRYPTION_KEY
+#   WEBHOOK_URL  (set to https://gt-n8n.fly.dev/ after first deploy)
+#   DB_HOST      (set to gt-timescaledb.internal)
+#   DISCORD_WEBHOOK_ALERTS
+#   DISCORD_WEBHOOK_TRADES
+#   DISCORD_WEBHOOK_REPORTS
+#   DISCORD_WEBHOOK_HEALTH
+#   FRED_API_KEY
+#   NEWS_API_KEY
+
+[[services]]
+  internal_port = 5678
+  protocol      = "http"
+
+  [[services.ports]]
+    port     = 80
+    handlers = ["http"]
+
+  [[services.ports]]
+    port     = 443
+    handlers = ["tls", "http"]
+
+[mounts]
+  source      = "n8n_data"
+  destination = "/home/node/.n8n"

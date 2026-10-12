@@ -1,0 +1,42 @@
+{
+  "name": "GT — Trade Notifier",
+  "nodes": [
+    {
+      "parameters": { "path": "trade-filled", "responseMode": "onReceived" },
+      "name": "Trade Filled Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "trade-filled"
+    },
+    {
+      "parameters": {
+        "jsCode": "const t = $input.first().json.body || $input.first().json;\nconst dir = t.direction || '?';\nconst asset = t.asset || '?';\nconst fill = t.fill_price ? Number(t.fill_price).toFixed(4) : '?';\nconst size = t.size_pct ? (t.size_pct * 100).toFixed(2) + '%' : '?';\nconst sl = t.stop_loss ? Number(t.stop_loss).toFixed(4) : '?';\nconst tp = t.take_profit ? Number(t.take_profit).toFixed(4) : '?';\nconst slip = t.slippage_pct ? (t.slippage_pct * 100).toFixed(4) + '%' : '?';\nconst regime = t.regime || '?';\nconst session = t.session || '?';\nconst conf = t.confidence ? (t.confidence * 100).toFixed(1) + '%' : '?';\nconst emoji = dir === 'BUY' ? '🟢' : '🔴';\nconst msg = `${emoji} **TRADE FILLED — ${dir} ${asset}**\\nFill: $${fill} | Size: ${size}\\nStop: $${sl} | Target: $${tp}\\nSlippage: ${slip} | Confidence: ${conf}\\nRegime: ${regime} | Session: ${session}`;\nreturn [{ json: { message: msg } }];"
+      },
+      "name": "Format Trade Card",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.DISCORD_WEBHOOK_TRADES }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [{ "name": "content", "value": "={{ $json.message }}" }]
+        },
+        "options": {}
+      },
+      "name": "Post to Discord Trades",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Trade Filled Webhook": { "main": [[{ "node": "Format Trade Card", "type": "main", "index": 0 }]] },
+    "Format Trade Card":    { "main": [[{ "node": "Post to Discord Trades", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" }
+}

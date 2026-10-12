@@ -1,0 +1,68 @@
+{
+  "name": "GT — Daily P&L Report",
+  "nodes": [
+    {
+      "parameters": {"rule": {"interval": [{"field": "cronExpression", "expression": "0 20 * * 1-5"}]}},
+      "name": "4PM ET Weekdays",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-400, 160],
+      "id": "sched-report"
+    },
+    {
+      "parameters": {"url": "http://host.docker.internal:8003/api/metrics/daily", "options": {"timeout": 10000}},
+      "name": "Get GLD Metrics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-160, 80],
+      "id": "get-gld"
+    },
+    {
+      "parameters": {"url": "http://host.docker.internal:8004/api/metrics/daily", "options": {"timeout": 10000}},
+      "name": "Get Signal Metrics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-160, 200],
+      "id": "get-sig"
+    },
+    {
+      "parameters": {"url": "http://host.docker.internal:8005/api/xauusd/training_status", "options": {"timeout": 10000}},
+      "name": "Get Training Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-160, 320],
+      "id": "get-train"
+    },
+    {
+      "parameters": {
+        "jsCode": "const gld = $('Get GLD Metrics').first().json;\nconst sig = $('Get Signal Metrics').first().json;\nconst train = $('Get Training Status').first().json;\n\nconst trades = gld.trade_count || 0;\nconst pnl = ((gld.total_pnl_pct || 0) * 100).toFixed(3);\nconst wr = ((gld.win_rate || 0) * 100).toFixed(1);\nconst conf = ((gld.avg_confidence || 0) * 100).toFixed(1);\n\nconst sigTotal = sig.total_signals || 0;\nconst sigPassed = sig.passed_signals || 0;\nconst passRate = ((sig.pass_rate || 0) * 100).toFixed(1);\nconst collapse = sig.collapse_alert ? '⚠️ YES' : '✅ No';\n\nconst bars = train.bars_since_retrain || 0;\nconst modelAge = train.model_age_h != null ? train.model_age_h + 'h' : 'N/A';\nconst trainActive = train.training_active ? '🔁 RUNNING' : '💤 Idle';\n\nconst pnlNum = parseFloat(pnl);\nconst pnlEmoji = pnlNum > 0 ? '📈' : pnlNum < 0 ? '📉' : '➡️';\nconst date = new Date().toISOString().split('T')[0];\n\nconst goLivePct = Math.min(100, Math.round(trades / 200 * 100));\n\nconst msg = [\n  pnlEmoji + ' **GoldenTrinity Daily Report — ' + date + '**',\n  '',\n  '**📊 Performance**',\n  'P&L: ' + pnl + '% | Win Rate: ' + wr + '%',\n  'Trades today: ' + trades + ' | Avg Confidence: ' + conf + '%',\n  '',\n  '**🔔 Signals**',\n  'Generated: ' + sigTotal + ' | Passed Gate: ' + sigPassed + ' (' + passRate + '%)',\n  'Confidence Collapse: ' + collapse,\n  '',\n  '**🧠 LSTM Training**',\n  'Status: ' + trainActive + ' | Model Age: ' + modelAge,\n  'New bars collected: ' + bars + ' / 50 needed',\n  '',\n  '**🎯 Go-Live Progress**',\n  'Trades toward 200: ' + trades + ' (' + goLivePct + '% of today)',\n  'Need: ≥200 trades | ≥50% win rate | Sharpe ≥1.0 | 30 days min',\n].join('\\n');\n\nreturn [{ json: { message: msg, pnl: pnlNum, trades } }];"
+      },
+      "name": "Build Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [80, 200],
+      "id": "build-report"
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.DISCORD_WEBHOOK_REPORTS }}",
+        "sendBody": true,
+        "bodyParameters": {"parameters": [{"name": "content", "value": "={{ $json.message }}"}]},
+        "options": {}
+      },
+      "name": "Post Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [320, 200],
+      "id": "post-report"
+    }
+  ],
+  "connections": {
+    "4PM ET Weekdays": {"main": [[{"node": "Get GLD Metrics", "type": "main", "index": 0}, {"node": "Get Signal Metrics", "type": "main", "index": 0}, {"node": "Get Training Status", "type": "main", "index": 0}]]},
+    "Get GLD Metrics": {"main": [[{"node": "Build Report", "type": "main", "index": 0}]]},
+    "Get Signal Metrics": {"main": [[{"node": "Build Report", "type": "main", "index": 0}]]},
+    "Get Training Status": {"main": [[{"node": "Build Report", "type": "main", "index": 0}]]},
+    "Build Report": {"main": [[{"node": "Post Report", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"}
+}

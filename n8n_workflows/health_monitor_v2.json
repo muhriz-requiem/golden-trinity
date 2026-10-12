@@ -1,0 +1,110 @@
+{
+  "name": "GT — Health Monitor",
+  "nodes": [
+    {
+      "parameters": {"rule": {"interval": [{"field": "minutes"}]}},
+      "name": "Every 5 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-400, 240],
+      "id": "sched-health"
+    },
+    {
+      "parameters": {"url": "http://host.docker.internal:8001/api/health", "options": {"timeout": 5000}},
+      "name": "Check Macro",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-160, 0],
+      "id": "chk-macro"
+    },
+    {
+      "parameters": {"url": "http://host.docker.internal:8002/api/health", "options": {"timeout": 5000}},
+      "name": "Check Risk",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-160, 120],
+      "id": "chk-risk"
+    },
+    {
+      "parameters": {"url": "http://host.docker.internal:8003/api/health", "options": {"timeout": 5000}},
+      "name": "Check Execution",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-160, 240],
+      "id": "chk-exec"
+    },
+    {
+      "parameters": {"url": "http://host.docker.internal:8004/api/health", "options": {"timeout": 5000}},
+      "name": "Check Signal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-160, 360],
+      "id": "chk-signal"
+    },
+    {
+      "parameters": {"url": "http://host.docker.internal:8005/api/health", "options": {"timeout": 5000}},
+      "name": "Check XAU/USD",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-160, 480],
+      "id": "chk-xauusd"
+    },
+    {
+      "parameters": {
+        "jsCode": "const svcs = [\n  { name: 'macro_service     :8001', data: $('Check Macro').first().json },\n  { name: 'risk_service      :8002', data: $('Check Risk').first().json },\n  { name: 'execution_service :8003', data: $('Check Execution').first().json },\n  { name: 'signal_service    :8004', data: $('Check Signal').first().json },\n  { name: 'xauusd_service    :8005', data: $('Check XAU/USD').first().json },\n];\nconst failed = svcs.filter(s => s.data.status !== 'healthy');\nconst allOk = failed.length === 0;\nconst lines = svcs.map(s => {\n  const ok = s.data.status === 'healthy';\n  const lat = s.data.latency_ms ? s.data.latency_ms + 'ms' : 'N/A';\n  return (ok ? '✅' : '❌') + ' ' + s.name + ' — ' + (ok ? lat : 'UNHEALTHY');\n});\nconst ts = new Date().toISOString().replace('T',' ').slice(0,19) + ' UTC';\nreturn [{ json: { allOk, failCount: failed.length, failedNames: failed.map(f=>f.name), lines: lines.join('\\n'), ts } }];"
+      },
+      "name": "Evaluate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [80, 240],
+      "id": "eval-health"
+    },
+    {
+      "parameters": {
+        "conditions": {"number": [{"value1": "={{ $json.failCount }}", "operation": "larger", "value2": 0}]}
+      },
+      "name": "Any Failed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [300, 240],
+      "id": "if-failed"
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.DISCORD_WEBHOOK_ALERTS }}",
+        "sendBody": true,
+        "bodyParameters": {"parameters": [{"name": "content", "value": "=@everyone 🚨 **GoldenTrinity Service DOWN**\n{{ $json.lines }}\n_{{ $json.ts }}_"}]},
+        "options": {}
+      },
+      "name": "Alert Failure",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 160],
+      "id": "disc-alert"
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.DISCORD_WEBHOOK_HEALTH }}",
+        "sendBody": true,
+        "bodyParameters": {"parameters": [{"name": "content", "value": "=🟢 **All 5 Services Healthy**\n{{ $json.lines }}\n_{{ $json.ts }}_"}]},
+        "options": {}
+      },
+      "name": "Health OK",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 320],
+      "id": "disc-ok"
+    }
+  ],
+  "connections": {
+    "Every 5 Minutes": {"main": [[{"node": "Check Macro", "type": "main", "index": 0}, {"node": "Check Risk", "type": "main", "index": 0}, {"node": "Check Execution", "type": "main", "index": 0}, {"node": "Check Signal", "type": "main", "index": 0}, {"node": "Check XAU/USD", "type": "main", "index": 0}]]},
+    "Check Macro": {"main": [[{"node": "Evaluate", "type": "main", "index": 0}]]},
+    "Check Risk": {"main": [[{"node": "Evaluate", "type": "main", "index": 0}]]},
+    "Check Execution": {"main": [[{"node": "Evaluate", "type": "main", "index": 0}]]},
+    "Check Signal": {"main": [[{"node": "Evaluate", "type": "main", "index": 0}]]},
+    "Check XAU/USD": {"main": [[{"node": "Evaluate", "type": "main", "index": 0}]]},
+    "Evaluate": {"main": [[{"node": "Any Failed?", "type": "main", "index": 0}]]},
+    "Any Failed?": {"main": [[{"node": "Alert Failure", "type": "main", "index": 0}], [{"node": "Health OK", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"}
+}

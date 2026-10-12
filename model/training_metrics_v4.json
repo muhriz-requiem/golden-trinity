@@ -1,0 +1,78 @@
+{
+  "completed": "2026-03-16T18:56:18.160718",
+  "best_config": "v4_B_5min_p35",
+  "best_sharpe": 54.111,
+  "best_hidden": 64,
+  "sim_gate": {
+    "high": 0.38,
+    "low": 0.38
+  },
+  "all_results": [
+    {
+      "config": "v4_A_5min_p40",
+      "best_sharpe": 14.182,
+      "fold_sharpes": [
+        0.0,
+        0.0,
+        14.182
+      ],
+      "threshold_used": 0.00074,
+      "elapsed_min": 14.5
+    },
+    {
+      "config": "v4_B_5min_p35",
+      "best_sharpe": 54.111,
+      "fold_sharpes": [
+        0.448,
+        0.148,
+        54.111
+      ],
+      "threshold_used": 0.00063,
+      "elapsed_min": 14.0
+    },
+    {
+      "config": "v4_C_5min_deep",
+      "best_sharpe": 15.326,
+      "fold_sharpes": [
+        -5.899,
+        -8.746,
+        15.326
+      ],
+      "threshold_used": 0.00074,
+      "elapsed_min": 21.4
+    },
+    {
+      "config": "v4_D_1min_p40",
+      "best_sharpe": 50.982,
+      "fold_sharpes": [
+        0.0,
+        50.982,
+        20.69
+      ],
+      "threshold_used": 0.00064,
+      "elapsed_min": 14.7
+    },
+    {
+      "config": "v4_E_1min_deep",
+      "best_sharpe": 6.624,
+      "fold_sharpes": [
+        0.0,
+        -2.152,
+        6.624
+      ],
+      "threshold_used": 0.00064,
+      "elapsed_min": 61.1
+    },
+    {
+      "config": "v4_F_5min_long",
+      "best_sharpe": 11.81,
+      "fold_sharpes": [
+        0.0,
+        3.674,
+        11.81
+      ],
+      "threshold_used": 0.00111,
+      "elapsed_min": 7.4
+    }
+  ]
+}

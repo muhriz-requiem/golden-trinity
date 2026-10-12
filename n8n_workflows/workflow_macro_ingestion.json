@@ -1,0 +1,67 @@
+{
+  "name": "GT — Macro Ingestion",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "minutes", "minutesInterval": 15 }] }
+      },
+      "name": "Every 15 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8001/api/macro/update",
+        "method": "POST",
+        "options": { "timeout": 30000 }
+      },
+      "name": "Trigger Macro Update",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $input.first().json;\nconst regime = result.regime || 'UNKNOWN';\nconst snap = result.snapshot || {};\nconst msg = `📊 **Macro Update**\\nRegime: **${regime}**\\nReal Rate: ${snap.real_rate ?? 'N/A'}%\\nDXY: ${snap.dxy ?? 'N/A'}\\nVIX: ${snap.vix ?? 'N/A'}\\nGVZ/VIX: ${snap.gvz_vix_ratio ?? 'N/A'}\\nNews Sentiment: ${snap.news_sentiment ?? 'N/A'}`;\nreturn [{ json: { regime, message: msg } }];"
+      },
+      "name": "Format Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [{ "value1": "={{ $json.regime }}", "operation": "notEqual", "value2": "NEUTRAL" }]
+        }
+      },
+      "name": "Regime Changed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.DISCORD_WEBHOOK_REPORTS }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [{ "name": "content", "value": "={{ $json.message }}" }]
+        },
+        "options": {}
+      },
+      "name": "Post to Discord Reports",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 220]
+    }
+  ],
+  "connections": {
+    "Every 15 Minutes":   { "main": [[{ "node": "Trigger Macro Update", "type": "main", "index": 0 }]] },
+    "Trigger Macro Update": { "main": [[{ "node": "Format Result", "type": "main", "index": 0 }]] },
+    "Format Result":      { "main": [[{ "node": "Regime Changed?", "type": "main", "index": 0 }]] },
+    "Regime Changed?":    { "main": [[{ "node": "Post to Discord Reports", "type": "main", "index": 0 }], []] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" }
+}

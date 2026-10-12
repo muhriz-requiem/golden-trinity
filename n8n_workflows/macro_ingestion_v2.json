@@ -1,0 +1,61 @@
+{
+  "name": "GT — Macro Ingestion",
+  "nodes": [
+    {
+      "parameters": {"rule": {"interval": [{"field": "minutes", "minutesInterval": 15}]}},
+      "name": "Every 15 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-880, 80],
+      "id": "sched-macro"
+    },
+    {
+      "parameters": {"method": "POST", "url": "http://host.docker.internal:8001/api/macro/update", "options": {"timeout": 30000}},
+      "name": "Trigger Macro Update",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-640, 80],
+      "id": "trigger-macro"
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $input.first().json;\nconst regime = result.regime || 'UNKNOWN';\nconst prev = result.previous_regime || null;\nconst snap = result.snapshot || {};\nconst regimeChanged = prev && prev !== regime;\nconst rr = snap.real_rate != null ? snap.real_rate.toFixed(2) : 'N/A';\nconst dxy = snap.dxy != null ? snap.dxy.toFixed(1) : 'N/A';\nconst vix = snap.vix != null ? snap.vix.toFixed(1) : 'N/A';\nconst gvzVix = snap.gvz_vix_ratio != null ? snap.gvz_vix_ratio.toFixed(2) : 'N/A';\nconst news = snap.news_sentiment != null ? snap.news_sentiment.toFixed(3) : 'N/A';\nconst regimeEmoji = regime === 'BULLISH' ? '🟢' : regime === 'BEARISH' ? '🔴' : '🟡';\nconst changeNote = regimeChanged ? ` (was ${prev})` : '';\nconst msg = [\n  regimeEmoji + ' **Regime: ' + regime + changeNote + '**',\n  'Real Rate: ' + rr + '% | DXY: ' + dxy + ' | VIX: ' + vix,\n  'GVZ/VIX: ' + gvzVix + ' | News: ' + news,\n].join('\\n');\nreturn [{ json: { regime, prev, regimeChanged, message: msg } }];"
+      },
+      "name": "Format Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-400, 80],
+      "id": "fmt-macro"
+    },
+    {
+      "parameters": {
+        "conditions": {"boolean": [{"value1": "={{ $json.regimeChanged }}", "value2": true}]}
+      },
+      "name": "Regime Changed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [-160, 80],
+      "id": "if-changed"
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.DISCORD_WEBHOOK_ALERTS }}",
+        "sendBody": true,
+        "bodyParameters": {"parameters": [{"name": "content", "value": "=📊 **Regime Change**\n{{ $json.message }}"}]},
+        "options": {}
+      },
+      "name": "Post Regime Change",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [80, 0],
+      "id": "post-regime"
+    }
+  ],
+  "connections": {
+    "Every 15 Minutes": {"main": [[{"node": "Trigger Macro Update", "type": "main", "index": 0}]]},
+    "Trigger Macro Update": {"main": [[{"node": "Format Result", "type": "main", "index": 0}]]},
+    "Format Result": {"main": [[{"node": "Regime Changed?", "type": "main", "index": 0}]]},
+    "Regime Changed?": {"main": [[{"node": "Post Regime Change", "type": "main", "index": 0}], []]}
+  },
+  "settings": {"executionOrder": "v1"}
+}

@@ -1,0 +1,42 @@
+{
+  "name": "GT — Trade Notifier",
+  "nodes": [
+    {
+      "parameters": {"httpMethod": "POST", "path": "trade-filled", "options": {}},
+      "name": "Trade Filled Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "trade-filled",
+      "id": "webhook-trade"
+    },
+    {
+      "parameters": {
+        "jsCode": "const t = $input.first().json.body || $input.first().json;\nconst dir = t.direction || '?';\nconst asset = t.asset || '?';\nconst fill = t.fill_price ? Number(t.fill_price).toFixed(2) : '?';\nconst size = t.size_pct ? (t.size_pct * 100).toFixed(2) + '%' : '?';\nconst sl = t.stop_loss ? Number(t.stop_loss).toFixed(2) : '?';\nconst tp = t.take_profit ? Number(t.take_profit).toFixed(2) : '?';\nconst slip = t.slippage_pct ? (t.slippage_pct * 100).toFixed(4) + '%' : '?';\nconst regime = t.regime || '?';\nconst session = t.session || '?';\nconst conf = t.confidence ? (t.confidence * 100).toFixed(1) + '%' : '?';\nconst broker = t.broker || 'unknown';\nconst expiry = t.expiry_at ? new Date(t.expiry_at).toISOString().slice(11,16) + ' UTC' : '?';\nconst isXau = asset === 'XAU/USD';\nconst isInverse = asset === 'DUST';\nconst emoji = dir === 'BUY' && !isInverse ? '🟢' : isInverse ? '🔻' : '🔴';\nconst label = isXau ? 'SIMULATED' : isInverse ? 'SELL→DUST' : 'PAPER';\nconst msg = [\n  emoji + ' **' + dir + ' ' + asset + '** [' + label + ']',\n  'Fill: $' + fill + ' | Size: ' + size + ' of NAV',\n  'Stop: $' + sl + ' | Target: $' + tp,\n  'Expires: ' + expiry + ' | Confidence: ' + conf,\n  'Slippage: ' + slip + ' | Regime: ' + regime + ' | Session: ' + session,\n].join('\\n');\nreturn [{ json: { message: msg, dir, asset } }];"
+      },
+      "name": "Format Trade Card",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 0],
+      "id": "fmt-trade"
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.DISCORD_WEBHOOK_TRADES }}",
+        "sendBody": true,
+        "bodyParameters": {"parameters": [{"name": "content", "value": "={{ $json.message }}"}]},
+        "options": {}
+      },
+      "name": "Post to Discord Trades",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 0],
+      "id": "post-trade"
+    }
+  ],
+  "connections": {
+    "Trade Filled Webhook": {"main": [[{"node": "Format Trade Card", "type": "main", "index": 0}]]},
+    "Format Trade Card": {"main": [[{"node": "Post to Discord Trades", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"}
+}

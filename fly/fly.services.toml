@@ -1,0 +1,44 @@
+# fly.services.toml
+# Fly app for all 4 Python microservices (macro, risk, execution, signal + health monitor)
+# Deploy: fly deploy --config fly/fly.services.toml
+
+app = "gt-services"
+primary_region = "iad"
+
+[build]
+  dockerfile = "fly/Dockerfile.services"
+
+# All secrets set via: fly secrets set KEY=VALUE --app gt-services
+# Run the full secrets command in DEPLOY_STEPS.md
+
+[[services]]
+  internal_port = 8001
+  protocol      = "http"
+
+  [[services.ports]]
+    port     = 8001
+    handlers = ["http"]
+
+[[services]]
+  internal_port = 8002
+  protocol      = "http"
+
+  [[services.ports]]
+    port     = 8002
+    handlers = ["http"]
+
+[[services]]
+  internal_port = 8003
+  protocol      = "http"
+
+  [[services.ports]]
+    port     = 8003
+    handlers = ["http"]
+
+[[services]]
+  internal_port = 8004
+  protocol      = "http"
+
+  [[services.ports]]
+    port     = 8004
+    handlers = ["http"]

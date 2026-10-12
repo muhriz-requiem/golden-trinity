@@ -1,0 +1,70 @@
+# --- Secrets: never commit ---
+# The original .env held live Alpaca / FRED / NewsAPI keys, four Discord webhook URLs,
+# a database password and an n8n encryption key. All were rotated before publication.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa
+.netrc
+credentials*
+*secrets*.json
+
+# --- Environments and build artifacts ---
+venv/
+env/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+
+# --- Third-party binaries (download on demand; cloudflared.exe alone is 62 MB) ---
+cloudflared.exe
+ffmpeg/
+ffmpeg.exe
+
+# --- Market data (re-downloadable, ~12 MB) ---
+data/*.csv
+download/
+*.parquet
+*.pkl
+
+# --- Trained model weights ---
+# Deliberately NOT published. These are 205 KB binaries derived from scraped audio /
+# market data and prove nothing that the training scripts don't.
+model/*.pt
+model/*.pth
+model/*.pt.bak*
+model/*.index
+
+# --- Runtime logs and error dumps (also contain machine paths) ---
+*.log
+log_*.txt
+exec_*.log
+*_err.txt
+*_out.txt
+_out2.txt
+_patch_*.txt
+pkg_list.txt
+cmdTranscript.txt
+
+# --- One-off developer scratch scripts ---
+_patch_*.py
+_patch_macro*.py
+check_syntax.py
+fix_exec.py
+make_icon.py
+icon_test_*.png
+
+# --- Local state ---
+.coverage
+coverage.xml
+htmlcov/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

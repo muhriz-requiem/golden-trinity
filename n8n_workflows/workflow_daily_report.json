@@ -1,0 +1,65 @@
+{
+  "name": "GT — Daily P&L Report",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "cronExpression", "expression": "0 17 * * 1-5" }] }
+      },
+      "name": "5 PM UTC Weekdays",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8003/api/metrics/daily",
+        "options": { "timeout": 10000 }
+      },
+      "name": "Get Execution Metrics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 220]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8004/api/metrics/daily",
+        "options": { "timeout": 10000 }
+      },
+      "name": "Get Signal Metrics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 380]
+    },
+    {
+      "parameters": {
+        "jsCode": "const exec = $('Get Execution Metrics').first().json;\nconst sig  = $('Get Signal Metrics').first().json;\nconst trades = exec.trade_count || 0;\nconst pnl = exec.total_pnl_pct ? (exec.total_pnl_pct * 100).toFixed(3) + '%' : '0%';\nconst wr = exec.win_rate ? (exec.win_rate * 100).toFixed(1) + '%' : '0%';\nconst conf = exec.avg_confidence ? (exec.avg_confidence * 100).toFixed(1) + '%' : '0%';\nconst sigTotal = sig.total_signals || 0;\nconst sigPassed = sig.passed_signals || 0;\nconst passRate = sig.pass_rate ? (sig.pass_rate * 100).toFixed(1) + '%' : '0%';\nconst collapse = sig.collapse_alert ? '⚠️ YES' : '✅ No';\nconst pnlEmoji = exec.total_pnl_pct > 0 ? '📈' : exec.total_pnl_pct < 0 ? '📉' : '➡️';\nconst date = new Date().toISOString().split('T')[0];\nconst msg = `${pnlEmoji} **GoldenTrinity Daily Report — ${date}**\\n\\n**Performance**\\nP&L: ${pnl} | Win Rate: ${wr}\\nTrades: ${trades} | Avg Confidence: ${conf}\\n\\n**Signals**\\nTotal: ${sigTotal} | Passed Gate: ${sigPassed} (${passRate})\\nConfidence Collapse Today: ${collapse}`;\nreturn [{ json: { message: msg } }];"
+      },
+      "name": "Build Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.DISCORD_WEBHOOK_REPORTS }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [{ "name": "content", "value": "={{ $json.message }}" }]
+        },
+        "options": {}
+      },
+      "name": "Post to Discord Reports",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [940, 300]
+    }
+  ],
+  "connections": {
+    "5 PM UTC Weekdays":    { "main": [[{ "node": "Get Execution Metrics", "type": "main", "index": 0 }, { "node": "Get Signal Metrics", "type": "main", "index": 0 }]] },
+    "Get Execution Metrics": { "main": [[{ "node": "Build Report", "type": "main", "index": 0 }]] },
+    "Get Signal Metrics":    { "main": [[{ "node": "Build Report", "type": "main", "index": 0 }]] },
+    "Build Report":          { "main": [[{ "node": "Post to Discord Reports", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" }
+}

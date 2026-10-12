@@ -1,0 +1,27 @@
+﻿           opened_at           | direction |  asset  | fill_price | exit_price |  exit_type  | pnl_pct | time_in_trade_min | session | regime_at_entry 
+-------------------------------+-----------+---------+------------+------------+-------------+---------+-------------------+---------+-----------------
+ 2026-03-23 00:02:48.734913+00 | BUY       | XAU/USD |  4468.0700 |  4436.8999 | STOP_LOSS   | -0.6200 |              6.95 | ASIAN   | NEUTRAL
+ 2026-03-23 00:07:02.43189+00  | BUY       | XAU/USD |  4464.4694 |  4436.8999 | STOP_LOSS   | -0.7000 |             11.17 | ASIAN   | NEUTRAL
+ 2026-03-23 00:24:54.97026+00  | SELL      | XAU/USD |  4445.0333 |  4375.1001 | TAKE_PROFIT |  1.0500 |              2.26 | ASIAN   | NEUTRAL
+ 2026-03-23 00:31:19.368398+00 | SELL      | XAU/USD |  4424.4363 |  4375.1001 | TAKE_PROFIT |  1.1200 |             14.30 | ASIAN   | NEUTRAL
+ 2026-03-23 00:43:22.062332+00 | SELL      | XAU/USD |  4421.3367 |  4411.6001 | TAKE_PROFIT |  0.7500 |             19.70 | ASIAN   | NEUTRAL
+ 2026-03-23 00:59:31.303239+00 | BUY       | XAU/USD |  4358.6537 |  4326.5000 | STOP_LOSS   | -0.7400 |              3.68 | ASIAN   | NEUTRAL
+ 2026-03-23 01:26:44.238763+00 | BUY       | XAU/USD |  4418.0625 |  4495.2900 | STOP_LOSS   | -3.5900 |              4.91 | ASIAN   | NEUTRAL
+ 2026-03-23 01:29:32.011188+00 | BUY       | XAU/USD |  4434.0649 |  4454.7998 | TAKE_PROFIT |  0.8300 |             17.13 | ASIAN   | NEUTRAL
+ 2026-03-23 01:44:44.134229+00 | BUY       | XAU/USD |  4447.6671 |  4410.2998 | STOP_LOSS   | -0.5400 |             32.41 | ASIAN   | NEUTRAL
+ 2026-03-23 01:53:26.658262+00 | SELL      | XAU/USD |  4436.4345 |  4423.6001 | STOP_LOSS   | -0.5400 |             13.19 | ASIAN   | NEUTRAL
+ 2026-03-23 02:02:14.101167+00 | SELL      | XAU/USD |  4409.6383 |  4393.3999 | TAKE_PROFIT |  0.9700 |             14.02 | ASIAN   | NEUTRAL
+ 2026-03-23 02:10:24.742062+00 | SELL      | XAU/USD |  4389.2414 |  4411.8999 | STOP_LOSS   | -0.5200 |              2.08 | ASIAN   | NEUTRAL
+ 2026-03-23 02:24:19.665225+00 | SELL      | XAU/USD |  4395.1404 |  4495.2900 | STOP_LOSS   | -3.2100 |             14.55 | ASIAN   | NEUTRAL
+ 2026-03-23 02:27:37.745828+00 | BUY       | XAU/USD |  4412.6618 |  4388.2002 | STOP_LOSS   | -0.5200 |             11.62 | ASIAN   | NEUTRAL
+ 2026-03-23 02:30:59.397269+00 | BUY       | XAU/USD |  4411.0615 |  4388.2002 | STOP_LOSS   | -0.5500 |             14.98 | ASIAN   | NEUTRAL
+ 2026-03-23 02:44:08.480683+00 | SELL      | XAU/USD |  4385.4422 |  4375.1001 | TAKE_PROFIT |  0.7800 |             45.90 | ASIAN   | NEUTRAL
+ 2026-03-23 02:50:13.049354+00 | SELL      | XAU/USD |  4372.8440 |  4357.3999 | STOP_LOSS   | -0.5500 |              2.97 | ASIAN   | NEUTRAL
+ 2026-03-23 03:01:14.389788+00 | BUY       | XAU/USD |  4381.3573 |  4360.0000 | TAKE_PROFIT |  0.8000 |             39.38 | ASIAN   | NEUTRAL
+ 2026-03-23 03:08:15.272769+00 | BUY       | XAU/USD |  4369.0552 |  4339.6001 | TAKE_PROFIT |  0.7600 |             61.69 | ASIAN   | NEUTRAL
+ 2026-03-23 03:15:37.237897+00 | SELL      | XAU/USD |  4370.3444 |  4351.2002 | TAKE_PROFIT |  0.7800 |             38.64 | ASIAN   | NEUTRAL
+ 2026-03-23 03:32:08.357083+00 | BUY       | XAU/USD |  4366.1548 |  4343.0000 | STOP_LOSS   | -0.5300 |             18.76 | ASIAN   | NEUTRAL
+ 2026-03-23 03:45:54.146358+00 | SELL      | XAU/USD |  4355.4467 |  4343.0000 | STOP_LOSS   | -0.6000 |             42.65 | ASIAN   | NEUTRAL
+ 2026-03-23 03:55:32.505182+00 | SELL      | XAU/USD |  4339.6488 |  4495.2900 | STOP_LOSS   | -2.8600 |             44.83 | ASIAN   | NEUTRAL
+(23 rows)
+
